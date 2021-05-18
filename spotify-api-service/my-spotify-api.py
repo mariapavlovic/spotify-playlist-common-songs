@@ -8,23 +8,70 @@
 import json
 import requests
 import flask
+from flask import request
+
+app = flask.Flask(__name__)
 
 @app.route("/")
-app = flask.Flask("__main__")
+def my_index():
+    return flask.render_template("index.html", token="Flask+React")
+
+
+@app.route("/send-access-token", methods=['POST'])
+def save_access_token():
+    file = open("private-info.txt", "w")
+    file.write(request.json['access_token']+"\n")
+    # file.write("access_token=\""+request.json['access_token']+"\"\n")
+    # file.write("expires_in="+request.json['expires_in']+"\n")
+    # file.write("token_type=\""+request.json['token_type']+"\"\n")
+    file.close()
+    return "success"
+
+
+@app.route("/create-playlist")
+def create_playlist():
+    a = MySpotifyApi()
+    a.add_tracks_to_new_playlist()
+    return "success"
+
+
+@app.route("/send-friends-user-info")
+def save_friends_user_info():
+    user_id = request.args.get('user_id')
+    file = open("private-info.txt", "a")
+    file.write(user_id+"\n")  
+    file.close()  
+    return "success" 
+
+
+@app.route("/send-current-user-info")
+def save_current_user_info():
+    access_token = file.readlines().rstrip()
+    print(access_token)
+    file = open("private-info.txt", "a")
+    query = "https://api.spotify.com/v1/me"
+    response = requests.get(
+        query,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer {}".format(access_token)
+        }
+    )
+    response_json = response.json()
+    user_id = response_json["id"]
+    file = open("private-info.txt", "a")
+    file.write(user_id+"\n")
+    file.close()
+    return "success" 
+
 
 class MySpotifyApi: 
-    
-    def my_index():
-        return flask.render_template("index.html", token="Flask+React")
-
     def __init__(self):
-        self.user_id = "mariatronn"
-        self.friend_id = "choiclara1"
-        self.access_token = "BQAyQxS1K3XhKxYIJNIktlh6vqRlbMScyM9bUtblJma9GrXaU_cN0kDQZB9OXN6GiT8vuakVWA8qvS1Km5Rd4eLtXj0vwiBFyyWotCgjj0xvfObHBWpeV5e_O_Pm2pGJ02UlRukfUN1lYuPVGQ3jn_f6gc3-NXKnXYpF_bDoVbeW0PS549TgKShR2dKtncylg3bhYjvNC6R-QoI3LHLooW8"
-
-
-    def set_access_token(self, access_token):
-        self.access_token = access_token
+        file = open("private-info.txt", "r")
+        self.access_token = file.readlines()[0].rstrip()
+        self.friend_id = file.readlines()[1]
+        self.user_id = file.readlines()[2]
+        file.close()
 
 
     def get_my_playlist_ids(self):
@@ -101,13 +148,12 @@ class MySpotifyApi:
     
     def create_new_playlist(self):
         request_body = json.dumps({
-            "name": "Our Joint Playlist",
+            "name": "Our Joint Playlist123",
             "description": "Common playlist tracks between us",
             "public": True
         })
 
         query = "https://api.spotify.com/v1/users/{}/playlists".format(self.user_id)
-
         response = requests.post(
             query,
             data=request_body,
@@ -141,17 +187,5 @@ class MySpotifyApi:
         return response_json
 
 
-app.run(debug=False)
-# a = MySpotifyApi()
-
-# a.get_my_playlist_ids()
-
-# a.get_friends_playlist_ids("choiclara1")
-
-# my_tracks = a.get_my_playlist_track_uris()
-
-# friends_tracks = a.get_friends_playlist_track_uris("choiclara1")
-
-# print(a.find_common_tracks(my_tracks, friends_tracks))
-
-# print(a.add_tracks_to_new_playlist())
+if __name__ == "__main__":
+    app.run(debug=True)

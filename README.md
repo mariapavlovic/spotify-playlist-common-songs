@@ -1,6 +1,6 @@
 # spotify-playlist-common-songs
 
-This is a web app that uses the Spotify API to allow a user to automatically create a playlist containing common songs between their own playlists and their friends (or any valid inputted Spotify user).
+This is a web app build with React (and Material UI) that uses the Spotify API (+some additional endpoints, written in Python and Flask) to allow a user to automatically create a playlist containing common songs between their own playlists and their friends (or any valid inputted Spotify user).
 
 The home page first looks like this, the first step being to log in to Spotify in order to gain access to your account.
 
